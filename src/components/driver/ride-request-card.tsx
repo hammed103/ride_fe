@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPinIcon, ClockIcon, UserIcon, DollarSignIcon } from "lucide-react";
+import { MapPinIcon, ClockIcon, DollarSignIcon } from "lucide-react";
 import { RideRequestModal } from "./ride-request-modal";
 import { RideRequest } from "@/lib/types";
 
@@ -26,12 +26,12 @@ export function RideRequestCard({ request, onStatusChange }: RideRequestCardProp
     return `${hours}h ${remainingMinutes}m`;
   };
 
-  // Calculate distance in km
+  // Calculate distance in km - use API value if available
   const distanceToPickup = request.distance_to_pickup?.value 
     ? (request.distance_to_pickup.value / 1000).toFixed(1) 
     : null;
   
-  // Calculate trip distance in km
+  // Use API trip distance if available
   const tripDistance = request.trip_distance?.value 
     ? (request.trip_distance.value / 1000).toFixed(1) 
     : null;
@@ -49,14 +49,19 @@ export function RideRequestCard({ request, onStatusChange }: RideRequestCardProp
   const minutesPerKm = 2;
   const estimatedTime = tripDistance 
     ? Math.round(baseDriveTime + parseFloat(tripDistance) * minutesPerKm) 
-    : 15; // default 15 minutes if no distance available
+    : 15;
 
   return (
     <>
       <Card className="overflow-hidden border-l-4 border-l-primary">
         <CardHeader className="pb-2">
           <div className="flex justify-between items-start">
-            <CardTitle className="text-lg font-semibold">Ride Request</CardTitle>
+            <div>
+              <CardTitle className="text-lg font-semibold">Ride Request</CardTitle>
+              {request.passenger_name && (
+                <p className="text-sm text-muted-foreground">From: {request.passenger_name}</p>
+              )}
+            </div>
             <Badge variant={request.status === "PENDING" ? 'outline' : 'default'}>
               {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
             </Badge>
@@ -69,6 +74,11 @@ export function RideRequestCard({ request, onStatusChange }: RideRequestCardProp
               <div className="space-y-1">
                 <p className="text-sm font-medium">Pickup</p>
                 <p className="text-sm text-muted-foreground">{request.pickup_location.address}</p>
+                {distanceToPickup && (
+                  <p className="text-xs text-muted-foreground">
+                    {distanceToPickup} km from your location
+                  </p>
+                )}
               </div>
             </div>
             <div className="flex items-start gap-2">
@@ -76,6 +86,11 @@ export function RideRequestCard({ request, onStatusChange }: RideRequestCardProp
               <div className="space-y-1">
                 <p className="text-sm font-medium">Destination</p>
                 <p className="text-sm text-muted-foreground">{request.destination.address}</p>
+                {tripDistance && (
+                  <p className="text-xs text-muted-foreground">
+                    Trip distance: {tripDistance} km
+                  </p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">

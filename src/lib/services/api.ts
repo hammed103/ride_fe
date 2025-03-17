@@ -29,7 +29,7 @@ export interface UserProfileData {
 }
 
 // Get the base URL from environment variables or use a default
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:3003';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000/';
 
 // Create an axios instance with default config
 const api = axios.create({

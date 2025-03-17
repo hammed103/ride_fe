@@ -35,8 +35,8 @@ export function SignUpForm({ userType: initialUserType = "passenger" }: { userTy
     try {
       // Register the user - use different endpoint based on userType
       const registerEndpoint = userType === "driver" 
-        ? "http://localhost:3003/api/rides/auth/driver/register/"
-        : "http://localhost:3003/api/rides/auth/register/";
+        ? "http://127.0.0.1:8000//api/rides/auth/driver/register/"
+        : "http://127.0.0.1:8000//api/rides/auth/register/";
         
       const registerResponse = await fetch(registerEndpoint, {
         method: "POST",
@@ -59,7 +59,7 @@ export function SignUpForm({ userType: initialUserType = "passenger" }: { userTy
       }
 
       // Automatically log in after successful registration
-      const loginResponse = await fetch("http://localhost:3003/api/rides/auth/login/", {
+      const loginResponse = await fetch("http://127.0.0.1:8000//api/rides/auth/login/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -38,6 +38,20 @@ interface LocationOption {
   coordinates: Coordinates;
 }
 
+// Add this type to handle the API response
+interface BookingResponse {
+  ride: {
+    driver_name: string;
+  };
+  ride_requests: Array<{
+    driver_name: string;
+    distance_to_pickup: {
+      value: number;
+      unit: string;
+    };
+  }>;
+}
+
 const formSchema = z.object({
   pickup_location: z.string().min(3, { message: "Please enter a valid pickup location" }),
   destination: z.string().min(3, { message: "Please enter a valid destination" }),
@@ -56,6 +70,7 @@ export function RideBookingForm() {
   const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
   const [mapMode, setMapMode] = useState<'pickup' | 'destination' | null>(null);
   const [selectedMapPin, setSelectedMapPin] = useState<Coordinates | null>(null);
+  const [bookingResponse, setBookingResponse] = useState<BookingResponse | null>(null);
   
   const pickupInputRef = useRef<HTMLInputElement>(null);
   const destinationInputRef = useRef<HTMLInputElement>(null);
@@ -237,10 +252,12 @@ export function RideBookingForm() {
     };
 
     try {
-      // Make the API call to book a ride
       const response = await rideApi.findDriver(rideData);
-      console.log("Ride booked successfully:", response.data);
+      const bookingResponse = response.data as unknown as BookingResponse;
+      console.log("Ride booked successfully:", bookingResponse);
       
+      // Store the response data for use in the template
+      setBookingResponse(bookingResponse);
       setBookingStatus('success');
     } catch (error) {
       console.error("Error booking ride:", error);
@@ -263,11 +280,14 @@ export function RideBookingForm() {
           </Alert>
         )}
 
-        {bookingStatus === 'success' && (
+        {bookingStatus === 'success' && bookingResponse && (
           <Alert className="mb-4 bg-green-50 border-green-200">
             <CheckCircleIcon className="h-4 w-4 text-green-600" />
             <AlertTitle>Ride Booked!</AlertTitle>
-            <AlertDescription>Your ride has been booked successfully. A driver will be assigned shortly.</AlertDescription>
+            <AlertDescription>
+              Your ride has been booked successfully. {bookingResponse.ride_requests[0]?.driver_name} is{' '}
+              {(bookingResponse.ride_requests[0]?.distance_to_pickup?.value / 1000).toFixed(1)}km away.
+            </AlertDescription>
           </Alert>
         )}
 
